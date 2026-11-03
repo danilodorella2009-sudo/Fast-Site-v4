@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<!-- TELA DE CADASTRO (pública): a pessoa preenche os dados e cria o login dela -->
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Turbo Garage | Cadastro</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="pagina-login">
+    <header class="topo">
+        <a class="marca" href="/index.html">
+            <div class="marca-logo">TG</div>
+            <div>
+                <div class="marca-nome">TURBO <span>GARAGE</span></div>
+                <div class="marca-slogan">Gestão de clientes para oficina mecânica</div>
+            </div>
+        </a>
+        <div class="topo-direita">
+            <div class="aluno">Aluno: <strong>Guilherme Felberque/Danilo Dorella</strong></div>
+            <a href="/index.html" class="btn btn-escuro btn-pequeno">Entrar</a>
+        </div>
+    </header>
+
+    <main class="cadastro-area">
+        <section class="cartao cadastro-cartao">
+            <h1>Criar cadastro</h1>
+            <p class="sub">Preencha seus dados. O email e a senha serão o seu login.</p>
+
+            <form id="formCadastro" novalidate>
+                <div class="secao">Dados de acesso</div>
+                <div class="campo">
+                    <label for="email">Email *</label>
+                    <input id="email" type="email" maxlength="150" placeholder="voce@gmail.com" autocomplete="email" required>
+                </div>
+                <div class="duas">
+                    <div class="campo">
+                        <label for="senha">Senha *</label>
+                        <input id="senha" type="password" minlength="6" maxlength="72" autocomplete="new-password" required>
+                        <div class="dica">Mínimo de 6 caracteres</div>
+                    </div>
+                    <div class="campo">
+                        <label for="confirmar">Confirmar senha *</label>
+                        <input id="confirmar" type="password" maxlength="72" autocomplete="new-password" required>
+                    </div>
+                </div>
+
+                <div class="secao">Dados do cliente</div>
+                <div class="campo">
+                    <label for="nome">Nome *</label>
+                    <input id="nome" maxlength="150" autocomplete="name" required>
+                </div>
+                <div class="linha">
+                    <div class="campo">
+                        <label for="cep">CEP *</label>
+                        <input id="cep" inputmode="numeric" placeholder="00000-000" maxlength="9" required>
+                        <div class="dica" id="dicaCep"></div>
+                    </div>
+                    <div class="campo">
+                        <label for="numero">Número *</label>
+                        <input id="numero" maxlength="10" required>
+                    </div>
+                </div>
+                <div class="campo">
+                    <label for="endereco">Endereço *</label>
+                    <input id="endereco" maxlength="200" placeholder="Rua, avenida ou logradouro" required>
+                </div>
+                <div class="campo">
+                    <label for="telefone">Telefone *</label>
+                    <input id="telefone" inputmode="numeric" placeholder="(00) 90000-0000" maxlength="15" required>
+                </div>
+                <div class="campo">
+                    <label for="observacao">Observação *</label>
+                    <textarea id="observacao" maxlength="2000" placeholder="Veículo, placa, serviço desejado..." required></textarea>
+                </div>
+                <button type="submit" class="btn">Salvar cadastro</button>
+            </form>
+
+            <div id="msgForm" class="alerta" role="alert"></div>
+            <div id="acoesSucesso" class="sucesso-acoes" hidden>
+                <a href="/index.html" class="btn">Fazer login →</a>
+            </div>
+
+            <p class="link-conta">Já tem conta? <a href="/index.html">Entrar</a></p>
+        </section>
+    </main>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script>
+        const $ = id => document.getElementById(id);
+
+        // ---------- Desafio 1: máscaras ----------
+        function mascaraCep(v) {
+            v = v.replace(/\D/g, "").slice(0, 8);
+            return v.length > 5 ? v.slice(0, 5) + "-" + v.slice(5) : v;
+        }
+        function mascaraTelefone(v) {
+            v = v.replace(/\D/g, "").slice(0, 11);
+            if (v.length <= 2) return v.length ? "(" + v : "";
+            if (v.length <= 6) return `(${v.slice(0, 2)}) ${v.slice(2)}`;
+            if (v.length <= 10) return `(${v.slice(0, 2)}) ${v.slice(2, 6)}-${v.slice(6)}`;
+            return `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
+        }
+        $("cep").addEventListener("input", e => {
+            e.target.value = mascaraCep(e.target.value);
+            if (e.target.value.length === 9) buscarViaCep(e.target.value);
+        });
+        $("telefone").addEventListener("input", e => e.target.value = mascaraTelefone(e.target.value));
+
+        // ---------- Desafio 2: ViaCEP ----------
+        async function buscarViaCep(cep) {
+            const dica = $("dicaCep");
+            dica.textContent = "Buscando CEP...";
+            try {
+                const r = await fetch(`https://viacep.com.br/ws/${cep.replace("-", "")}/json/`);
+                const d = await r.json();
+                if (d.erro) { dica.textContent = "CEP não encontrado"; return; }
+                const partes = [d.logradouro, d.bairro, d.localidade && `${d.localidade}/${d.uf}`].filter(Boolean);
+                $("endereco").value = partes.join(", ");
+                dica.textContent = "Endereço preenchido pelo ViaCEP";
+                $("numero").focus();
+            } catch {
+                dica.textContent = "Não foi possível consultar o CEP";
+            }
+        }
+
+        // ---------- Mensagens ----------
+        function alerta(texto, tipo) {
+            const el = $("msgForm");
+            el.textContent = texto;
+            el.className = "alerta " + tipo;
+        }
+        function toast(texto) {
+            const t = $("toast");
+            t.textContent = texto;
+            t.classList.add("mostrar");
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => t.classList.remove("mostrar"), 3500);
+        }
+
+        // ---------- POST /api/cadastros ----------
+        $("formCadastro").addEventListener("submit", async e => {
+            e.preventDefault();
+            $("acoesSucesso").hidden = true;
+            const campos = ["email", "senha", "nome", "endereco", "cep", "numero", "telefone", "observacao"];
+            const dados = {};
+            for (const c of campos) dados[c] = c === "senha" ? $(c).value : $(c).value.trim();
+
+            const vazio = campos.find(c => !dados[c]);
+            if (vazio) { alerta("Preencha todos os campos obrigatórios.", "erro"); $(vazio).focus(); return; }
+            if (!$("email").checkValidity()) { alerta("Digite um email válido.", "erro"); $("email").focus(); return; }
+            if (dados.senha.length < 6) { alerta("A senha precisa ter pelo menos 6 caracteres.", "erro"); $("senha").focus(); return; }
+            if (dados.senha !== $("confirmar").value) { alerta("As senhas não são iguais.", "erro"); $("confirmar").focus(); return; }
+
+            try {
+                const r = await fetch("/api/cadastros", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dados)
+                });
+                const resp = await r.json().catch(() => ({}));
+                if (!r.ok) { alerta(resp.mensagem || "Erro " + r.status, "erro"); return; }
+
+                alerta(resp.mensagem, "sucesso");   // "Cadastro realizado com sucesso!"
+                toast("✔ " + resp.mensagem);
+                e.target.reset();
+                $("dicaCep").textContent = "";
+                $("acoesSucesso").hidden = false;
+            } catch {
+                alerta("Servidor indisponível. Tente novamente.", "erro");
+            }
+        });
+    </script>
+</body>
+</html>

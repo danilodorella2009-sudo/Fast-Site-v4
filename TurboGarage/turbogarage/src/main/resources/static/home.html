@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!-- TELA 2: BOAS-VINDAS (HERO) COM IMAGEM EM TELA CHEIA - abre quando o login está certo -->
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Turbo Garage | Painel</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="pagina-hero oculto">
+    <header class="topo">
+        <a class="marca" href="/home.html">
+            <div class="marca-logo">TG</div>
+            <div>
+                <div class="marca-nome">TURBO <span>GARAGE</span></div>
+                <div class="marca-slogan">Gestão de clientes para oficina mecânica</div>
+            </div>
+        </a>
+        <div class="topo-direita">
+            <nav>
+                <a href="/home.html" class="ativo">Início</a>
+                <a href="/cadastros.html" data-so-admin hidden>Clientes</a>
+                <a href="/veiculos.html">Veículos</a>
+                <a href="/ordens.html" data-so-admin hidden>Ordens de Serviço</a>
+            </nav>
+            <div class="aluno">Aluno: <strong>Guilherme Felberque/Danilo Dorella</strong></div>
+            <button id="btnSair" class="btn btn-escuro btn-pequeno">Sair</button>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-conteudo">
+            <h1>Bem-vindo, <span data-nome-logado></span>!</h1>
+
+            <!-- Texto para o ADMINISTRADOR -->
+            <div data-so-admin hidden>
+                <p>Você está no painel do administrador da <strong>Turbo Garage</strong>
+                   (<span data-email-logado></span>).<br>Gerencie clientes, veículos e ordens de serviço.</p>
+                <div class="atalhos">
+                    <a href="/cadastros.html" class="btn">Clientes</a>
+                    <a href="/veiculos.html" class="btn">Veículos</a>
+                    <a href="/ordens.html" class="btn">Ordens de Serviço</a>
+                </div>
+            </div>
+
+            <!-- Texto para o CLIENTE -->
+            <div data-so-cliente hidden>
+                <p>Seu cadastro na <strong>Turbo Garage</strong> está ativo
+                   (<span data-email-logado></span>).<br>
+                   Nossa equipe vai entrar em contato pelo telefone informado.</p>
+                <div class="atalhos">
+                    <a href="/veiculos.html" class="btn">Cadastrar meu veículo</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="/js/sessao.js"></script>
+    <script>
+        ligarBotaoSair();
+        exigirLogin();
+    </script>
+</body>
+</html>

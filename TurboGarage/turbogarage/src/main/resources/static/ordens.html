@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<!-- PARTE 4 - NOVA TELA 2: CRUD DE ORDENS DE SERVIÇO (só o administrador acessa) -->
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Turbo Garage | Ordens de Serviço</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="oculto">
+    <header class="topo">
+        <a class="marca" href="/home.html">
+            <div class="marca-logo">TG</div>
+            <div>
+                <div class="marca-nome">TURBO <span>GARAGE</span></div>
+                <div class="marca-slogan">Gestão de clientes para oficina mecânica</div>
+            </div>
+        </a>
+        <div class="topo-direita">
+            <nav>
+                <a href="/home.html">Início</a>
+                <a href="/cadastros.html">Clientes</a>
+                <a href="/veiculos.html">Veículos</a>
+                <a href="/ordens.html" class="ativo">Ordens de Serviço</a>
+            </nav>
+            <div class="aluno">Aluno: <strong>Guilherme Felberque/Danilo Dorella</strong></div>
+            <button id="btnSair" class="btn btn-escuro btn-pequeno">Sair</button>
+        </div>
+    </header>
+
+    <main class="conteudo">
+        <h1 class="titulo-pagina"><span>Ordens</span> de serviço</h1>
+
+        <div class="grade">
+            <!-- ===== CREATE / UPDATE ===== -->
+            <section class="cartao" id="cartaoForm">
+                <h2 id="tituloForm">Nova ordem</h2>
+                <form id="formOrdem" novalidate>
+                    <div class="campo">
+                        <label for="veiculoId">Veículo *</label>
+                        <select id="veiculoId" required>
+                            <option value="">Carregando veículos...</option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="defeito">Defeito / serviço *</label>
+                        <textarea id="defeito" maxlength="500" placeholder="Ex.: barulho na suspensão dianteira" required></textarea>
+                    </div>
+                    <div class="linha">
+                        <div class="campo">
+                            <label for="valor">Valor (R$) *</label>
+                            <input id="valor" type="number" min="0" step="0.01" placeholder="0,00" required>
+                        </div>
+                        <div class="campo">
+                            <label for="status">Status *</label>
+                            <select id="status" required>
+                                <option value="ABERTA">Aberta</option>
+                                <option value="EM_ANDAMENTO">Em andamento</option>
+                                <option value="CONCLUIDA">Concluída</option>
+                                <option value="CANCELADA">Cancelada</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-botoes">
+                        <button type="submit" class="btn" id="btnSalvar">Salvar</button>
+                        <button type="button" class="btn btn-claro" id="btnCancelar" hidden>Cancelar edição</button>
+                    </div>
+                </form>
+                <div id="msgForm" class="alerta" role="alert"></div>
+            </section>
+
+            <!-- ===== READ / DELETE ===== -->
+            <section class="cartao">
+                <h2>Ordens cadastradas</h2>
+                <div class="barra-lista">
+                    <input id="filtro" type="search" placeholder="Buscar por placa, cliente ou defeito">
+                    <select id="filtroStatus" aria-label="Filtrar por status">
+                        <option value="">Todos os status</option>
+                        <option value="ABERTA">Aberta</option>
+                        <option value="EM_ANDAMENTO">Em andamento</option>
+                        <option value="CONCLUIDA">Concluída</option>
+                        <option value="CANCELADA">Cancelada</option>
+                    </select>
+                    <button class="btn btn-pequeno" id="btnExportar" type="button">Exportar Excel</button>
+                </div>
+                <div class="total" id="total"></div>
+                <div class="tabela-rolagem">
+                    <table>
+                        <thead>
+                            <tr><th>OS</th><th>Veículo</th><th>Defeito</th><th>Valor</th><th>Status</th><th></th></tr>
+                        </thead>
+                        <tbody id="lista"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script src="/js/sessao.js"></script>
+    <script src="/js/comum.js"></script>
+    <script>
+        const NOMES_STATUS = { ABERTA: "Aberta", EM_ANDAMENTO: "Em andamento", CONCLUIDA: "Concluída", CANCELADA: "Cancelada" };
+        let ordens = [];
+        let editandoId = null;   // null = criando; número = editando
+
+        // ---------- Veículos para o <select> (GET /api/veiculos) ----------
+        async function carregarVeiculos() {
+            const veiculos = await api("/api/veiculos");
+            const sel = $("veiculoId");
+            sel.innerHTML = '<option value="">Selecione o veículo</option>';
+            for (const v of veiculos) {
+                const op = document.createElement("option");
+                op.value = v.id;
+                op.textContent = `${v.placa} - ${v.modelo} (${v.clienteNome || "sem cliente"})`;
+                sel.appendChild(op);
+            }
+            if (veiculos.length === 0) {
+                sel.innerHTML = '<option value="">Cadastre um veículo primeiro</option>';
+            }
+        }
+
+        // ---------- READ: GET /api/ordens ----------
+        async function carregar() {
+            try {
+                ordens = await api("/api/ordens");
+                desenhar();
+            } catch (err) {
+                if (err.message !== "redirecionado") toast(err.message, "erro");
+            }
+        }
+
+        function filtradas() {
+            const termo = normalizar($("filtro").value);
+            const status = $("filtroStatus").value;
+            return ordens.filter(o =>
+                (!status || o.status === status) &&
+                normalizar(`${o.id} ${o.veiculoPlaca} ${o.veiculoModelo} ${o.clienteNome} ${o.defeito}`).includes(termo));
+        }
+
+        function desenhar() {
+            const lista = filtradas();
+            const tbody = $("lista");
+            tbody.innerHTML = "";
+            const soma = lista.reduce((s, o) => s + Number(o.valor), 0);
+            $("total").textContent = `${lista.length} de ${ordens.length} ordem(ns) · total ${moeda(soma)}`;
+            if (lista.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="vazio">${ordens.length ? "Nenhuma ordem encontrada na busca." : "Nenhuma ordem de serviço ainda."}</td></tr>`;
+                return;
+            }
+            for (const o of lista) {
+                const tr = document.createElement("tr");
+                if (o.id === editandoId) tr.className = "selecionado";
+                tr.innerHTML = `<td></td>
+                    <td><span class="placa"></span><br><small></small></td>
+                    <td class="texto-longo"></td>
+                    <td class="dinheiro"></td>
+                    <td><span class="status"></span></td>
+                    <td class="acoes">
+                        <button class="btn btn-pequeno" data-editar>Editar</button>
+                        <button class="btn btn-pequeno btn-perigo" data-excluir>Excluir</button>
+                    </td>`;
+                const c = tr.children;   // textContent evita injeção de HTML
+                c[0].textContent = "#" + o.id;
+                c[1].querySelector(".placa").textContent = o.veiculoPlaca;
+                c[1].querySelector("small").textContent = `${o.veiculoModelo} · ${o.clienteNome || "—"}`;
+                c[2].textContent = o.defeito;
+                c[3].textContent = moeda(o.valor);
+                const st = c[4].querySelector(".status");
+                st.textContent = NOMES_STATUS[o.status] || o.status;
+                st.classList.add(o.status);
+                tr.querySelector("[data-editar]").onclick = () => editar(o.id);
+                tr.querySelector("[data-excluir]").onclick = () => excluir(o);
+                tbody.appendChild(tr);
+            }
+        }
+        $("filtro").addEventListener("input", desenhar);
+        $("filtroStatus").addEventListener("change", desenhar);
+
+        // ---------- UPDATE (passo 1): GET /api/ordens/{id} carrega no formulário ----------
+        async function editar(id) {
+            try {
+                const o = await api("/api/ordens/" + id);
+                editandoId = o.id;
+                $("veiculoId").value = o.veiculoId;
+                $("defeito").value = o.defeito;
+                $("valor").value = Number(o.valor).toFixed(2);
+                $("status").value = o.status;
+                $("tituloForm").innerHTML = 'Editar ordem <span class="modo"></span>';
+                $("tituloForm").querySelector(".modo").textContent = "OS #" + o.id;
+                $("btnSalvar").textContent = "Salvar alterações";
+                $("btnCancelar").hidden = false;
+                $("cartaoForm").classList.add("form-editando");
+                erroForm("");
+                desenhar();
+                $("defeito").focus();
+                $("cartaoForm").scrollIntoView({ behavior: "smooth", block: "start" });
+            } catch (err) {
+                if (err.message !== "redirecionado") toast(err.message, "erro");
+            }
+        }
+
+        function limparFormulario() {
+            editandoId = null;
+            $("formOrdem").reset();
+            $("tituloForm").textContent = "Nova ordem";
+            $("btnSalvar").textContent = "Salvar";
+            $("btnCancelar").hidden = true;
+            $("cartaoForm").classList.remove("form-editando");
+            erroForm("");
+            desenhar();
+        }
+        $("btnCancelar").onclick = limparFormulario;
+
+        // ---------- CREATE (POST) e UPDATE (PUT) ----------
+        $("formOrdem").addEventListener("submit", async e => {
+            e.preventDefault();
+            const dados = {
+                veiculoId: $("veiculoId").value ? Number($("veiculoId").value) : null,
+                defeito: $("defeito").value.trim(),
+                valor: $("valor").value === "" ? null : Number($("valor").value),
+                status: $("status").value
+            };
+
+            // Validação dos campos obrigatórios na tela
+            if (!dados.veiculoId) { erroForm("Escolha o veículo."); $("veiculoId").focus(); return; }
+            if (!dados.defeito) { erroForm("Descreva o defeito ou serviço."); $("defeito").focus(); return; }
+            if (dados.valor === null || isNaN(dados.valor) || dados.valor < 0) { erroForm("Informe um valor válido (0 ou mais)."); $("valor").focus(); return; }
+
+            try {
+                const resp = editandoId
+                    ? await api("/api/ordens/" + editandoId, { method: "PUT", body: dados })
+                    : await api("/api/ordens", { method: "POST", body: dados });
+                toast(resp.mensagem);   // "Registro salvo com sucesso!" ou "Registro atualizado"
+                limparFormulario();
+                await carregar();
+            } catch (err) {
+                if (err.message !== "redirecionado") erroForm(err.message);
+            }
+        });
+
+        // ---------- DELETE com confirmação ----------
+        async function excluir(o) {
+            const ok = await confirmar("Excluir ordem de serviço?",
+                `A OS #${o.id} (${o.veiculoPlaca} - ${moeda(o.valor)}) será removida definitivamente do banco de dados.`);
+            if (!ok) return;
+            try {
+                const resp = await api("/api/ordens/" + o.id, { method: "DELETE" });
+                toast(resp.mensagem);   // "Registro excluído"
+                if (editandoId === o.id) limparFormulario();
+                await carregar();
+            } catch (err) {
+                if (err.message !== "redirecionado") toast(err.message, "erro");
+            }
+        }
+
+        // ---------- Desafio 2: exportar ----------
+        $("btnExportar").onclick = () => exportarCSV("ordens_servico.csv",
+            ["OS", "Placa", "Modelo", "Cliente", "Defeito", "Valor", "Status", "Abertura"],
+            filtradas().map(o => [o.id, o.veiculoPlaca, o.veiculoModelo, o.clienteNome, o.defeito,
+                Number(o.valor).toFixed(2).replace(".", ","), NOMES_STATUS[o.status], o.dataAbertura]));
+
+        ligarBotaoSair();
+        exigirAdmin().then(u => { if (u) { carregarVeiculos(); carregar(); } });
+    </script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<!-- TELA 1: LOGIN (endereço: http://localhost:8080) -->
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Turbo Garage | Login</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="pagina-login">
+    <header class="topo">
+        <div class="marca">
+            <div class="marca-logo">TG</div>
+            <div>
+                <div class="marca-nome">TURBO <span>GARAGE</span></div>
+                <div class="marca-slogan">Gestão de clientes para oficina mecânica</div>
+            </div>
+        </div>
+        <div class="aluno">Aluno: <strong>Guilherme Felberque/Danilo Dorella</strong></div>
+    </header>
+
+    <main class="login-area">
+        <div class="cartao login-cartao">
+            <h1>Entrar</h1>
+            <p class="sub">Acesse o painel da oficina.</p>
+
+            <form id="formLogin" novalidate>
+                <div class="campo">
+                    <label for="email">Usuário (email)</label>
+                    <input type="email" id="email" placeholder="seuemail@gmail.com" autocomplete="username" required>
+                </div>
+                <div class="campo">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="btn">Entrar</button>
+            </form>
+
+            <div id="mensagem" class="alerta" role="alert"></div>
+
+            <p class="link-conta">Ainda não tem conta? <a href="/cadastro.html">Cadastre-se</a></p>
+        </div>
+    </main>
+
+    <script>
+        const form = document.getElementById("formLogin");
+        const msg = document.getElementById("mensagem");
+        const campos = [document.getElementById("email"), document.getElementById("senha")];
+
+        function mostrarErro(texto) {
+            msg.textContent = texto;
+            msg.className = "alerta erro";
+            campos.forEach(c => c.classList.add("invalido"));
+        }
+
+        campos.forEach(c => c.addEventListener("input", () => {
+            c.classList.remove("invalido");
+            msg.className = "alerta";
+        }));
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault(); // impede a página de recarregar
+
+            const email = campos[0].value.trim();
+            const senha = campos[1].value;
+
+            // Validação na tela: campos vazios
+            if (!email || !senha) {
+                mostrarErro("Preencha usuário e senha.");
+                return;
+            }
+
+            try {
+                // Envia email e senha: quem compara com o hash BCrypt é o Java
+                const resposta = await fetch("/api/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, senha })
+                });
+
+                if (resposta.ok) {
+                    window.location.href = "/home.html"; // LOGIN CERTO: abre a tela de boas-vindas
+                } else {
+                    const dados = await resposta.json().catch(() => ({}));
+                    mostrarErro(dados.mensagem || "Email ou senha inválidos");
+                }
+            } catch (erro) {
+                mostrarErro("Servidor indisponível. Tente novamente.");
+            }
+        });
+    </script>
+</body>
+</html>
