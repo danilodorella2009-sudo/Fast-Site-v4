@@ -1,0 +1,233 @@
+/* =========================================================
+   TURBO GARAGE - identidade visual
+   Flat design / cores duras / alto contraste:
+   preto + amarelo + branco, com vermelho só para erros.
+   ========================================================= */
+:root {
+    --preto: #0b0b0b;
+    --amarelo: #ffd400;
+    --branco: #ffffff;
+    --cinza: #f2f2f2;
+    --vermelho: #e10600;
+    --verde: #00a651;
+    --borda: 3px solid var(--preto);
+    --sombra: 6px 6px 0 var(--preto);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Arial Black", Arial, Helvetica, sans-serif;
+    background: var(--cinza);
+    color: var(--preto);
+}
+
+/* ---------- Cabeçalho da marca (todas as telas) ---------- */
+.topo {
+    background: var(--preto);
+    color: var(--branco);
+    border-bottom: 6px solid var(--amarelo);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
+}
+.marca { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+.marca-logo {
+    width: 44px; height: 44px; background: var(--amarelo); color: var(--preto);
+    display: grid; place-items: center; font-size: 22px; transform: skewX(-10deg);
+}
+.marca-nome { font-size: 22px; letter-spacing: 1px; line-height: 1; }
+.marca-nome span { color: var(--amarelo); }
+.marca-slogan { font-family: Arial, sans-serif; font-size: 12px; color: #cfcfcf; margin-top: 4px; }
+.topo-direita { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.aluno { font-family: Arial, sans-serif; font-size: 13px; }
+.aluno strong { color: var(--amarelo); }
+.topo nav a {
+    color: var(--branco); text-decoration: none; font-size: 14px; padding: 6px 4px;
+    border-bottom: 3px solid transparent;
+}
+.topo nav a:hover, .topo nav a.ativo { border-bottom-color: var(--amarelo); }
+
+/* ---------- Botões e campos ---------- */
+.btn {
+    font-family: inherit; font-size: 15px; text-transform: uppercase;
+    background: var(--amarelo); color: var(--preto);
+    border: var(--borda); padding: 10px 18px; cursor: pointer;
+    box-shadow: 4px 4px 0 var(--preto); transition: transform .05s;
+    text-decoration: none; display: inline-block;
+}
+.btn:hover { background: var(--preto); color: var(--amarelo); }
+.btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--preto); }
+.btn-escuro { background: var(--preto); color: var(--amarelo); border-color: var(--amarelo); box-shadow: none; }
+.btn-escuro:hover { background: var(--amarelo); color: var(--preto); }
+.btn-pequeno { font-size: 12px; padding: 5px 10px; box-shadow: 2px 2px 0 var(--preto); }
+.btn-perigo { background: var(--branco); color: var(--vermelho); border-color: var(--vermelho); box-shadow: 2px 2px 0 var(--vermelho); }
+.btn-perigo:hover { background: var(--vermelho); color: var(--branco); }
+
+label { display: block; font-size: 13px; text-transform: uppercase; margin-bottom: 4px; }
+input, textarea {
+    width: 100%; padding: 10px 12px; font-size: 15px; font-family: Arial, sans-serif;
+    border: var(--borda); background: var(--branco); color: var(--preto); outline: none;
+}
+input:focus, textarea:focus { background: #fffbe0; box-shadow: 4px 4px 0 var(--amarelo); }
+textarea { resize: vertical; min-height: 80px; }
+.campo { margin-bottom: 14px; }
+
+/* ---------- Mensagens ---------- */
+.alerta {
+    font-family: Arial, sans-serif; font-weight: bold; padding: 12px 14px;
+    border: var(--borda); margin-top: 14px; display: none;
+}
+.alerta.erro { display: block; background: var(--vermelho); color: var(--branco); }
+.alerta.sucesso { display: block; background: var(--verde); color: var(--branco); }
+
+/* ---------- Tela de LOGIN ---------- */
+.pagina-login { min-height: 100vh; display: flex; flex-direction: column; }
+.login-area {
+    flex: 1; display: grid; place-items: center; padding: 32px 16px;
+    background: repeating-linear-gradient(-45deg, var(--amarelo) 0 40px, var(--preto) 40px 80px);
+}
+.cartao {
+    background: var(--branco); border: var(--borda); box-shadow: var(--sombra);
+    padding: 28px;
+}
+.login-cartao { width: 100%; max-width: 380px; }
+.login-cartao h1 { margin: 0 0 4px; font-size: 28px; text-transform: uppercase; }
+.login-cartao p.sub { margin: 0 0 20px; font-family: Arial, sans-serif; color: #444; }
+.login-cartao .btn { width: 100%; margin-top: 6px; }
+input.invalido { border-color: var(--vermelho); background: #ffecec; }
+
+/* ---------- Tela HERO (boas-vindas em tela cheia) ---------- */
+.pagina-hero { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+.hero {
+    flex: 1; position: relative;
+    background: var(--preto) url("../img/hero.svg") center / cover no-repeat;
+    display: flex; align-items: flex-end;
+}
+.hero-conteudo {
+    position: relative; margin: 0 0 6vh 5vw; max-width: 640px;
+    background: var(--preto); color: var(--branco);
+    border: 4px solid var(--amarelo); padding: 28px 32px;
+    box-shadow: 10px 10px 0 var(--amarelo);
+}
+.hero-conteudo h1 { margin: 0 0 8px; font-size: clamp(28px, 5vw, 52px); line-height: 1.05; text-transform: uppercase; }
+.hero-conteudo h1 span { color: var(--amarelo); }
+.hero-conteudo p { font-family: Arial, sans-serif; font-size: 17px; margin: 0 0 20px; }
+
+/* ---------- Tela de CADASTRO e CONSULTA ---------- */
+.conteudo { padding: 28px 24px; max-width: 1240px; margin: 0 auto; }
+.titulo-pagina { font-size: 30px; text-transform: uppercase; margin: 0 0 20px; }
+.titulo-pagina span { background: var(--amarelo); padding: 0 8px; }
+.grade { display: grid; grid-template-columns: minmax(300px, 420px) 1fr; gap: 28px; align-items: start; }
+.cartao h2 { margin: 0 0 16px; font-size: 20px; text-transform: uppercase; border-bottom: var(--borda); padding-bottom: 8px; }
+.linha { display: grid; grid-template-columns: 1fr 110px; gap: 12px; }
+.dica { font-family: Arial, sans-serif; font-size: 12px; color: #555; margin-top: 4px; min-height: 14px; }
+
+.busca { display: flex; gap: 8px; margin-bottom: 16px; }
+.busca input { max-width: 160px; }
+
+table { width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 14px; }
+th { background: var(--preto); color: var(--amarelo); text-align: left; padding: 10px; text-transform: uppercase; font-size: 12px; }
+td { padding: 10px; border-bottom: 2px solid var(--preto); }
+tr.selecionado td { background: #fff3a6; }
+td.acoes { white-space: nowrap; text-align: right; }
+td.acoes .btn { margin-left: 6px; }
+.vazio { font-family: Arial, sans-serif; padding: 16px; text-align: center; color: #555; }
+
+.detalhe { margin-top: 24px; display: none; }
+.detalhe.visivel { display: block; }
+.detalhe dl { display: grid; grid-template-columns: 140px 1fr; margin: 0; font-family: Arial, sans-serif; }
+.detalhe dt { font-weight: bold; text-transform: uppercase; font-size: 12px; padding: 8px; background: var(--amarelo); border-bottom: 2px solid var(--preto); }
+.detalhe dd { margin: 0; padding: 8px; border-bottom: 2px solid var(--cinza); white-space: pre-wrap; word-break: break-word; }
+
+/* Notificação flutuante "Cadastro realizado com sucesso!" */
+.toast {
+    position: fixed; right: 20px; bottom: 20px; z-index: 10;
+    background: var(--verde); color: var(--branco); border: var(--borda); box-shadow: var(--sombra);
+    padding: 16px 20px; font-size: 16px; transform: translateY(150%); transition: transform .25s;
+}
+.toast.mostrar { transform: translateY(0); }
+
+@media (max-width: 860px) {
+    .grade { grid-template-columns: 1fr; }
+    .topo { padding: 12px 16px; }
+    .conteudo { padding: 20px 16px; }
+    .hero-conteudo { margin: 0 16px 24px; padding: 20px; }
+    .detalhe dl { grid-template-columns: 110px 1fr; }
+    .tabela-rolagem { overflow-x: auto; }
+}
+
+body.oculto { visibility: hidden; }
+
+[hidden] { display: none !important; }
+
+/* Link "Cadastre-se" / "Já tenho conta" */
+.link-conta { font-family: Arial, sans-serif; text-align: center; margin: 16px 0 0; }
+.link-conta a { color: var(--preto); font-weight: bold; background: var(--amarelo); padding: 2px 6px; text-decoration: none; }
+.link-conta a:hover { background: var(--preto); color: var(--amarelo); }
+
+/* Tela de cadastro público */
+.cadastro-area {
+    flex: 1; padding: 32px 16px; display: flex; justify-content: center; align-items: flex-start;
+    background: repeating-linear-gradient(-45deg, var(--amarelo) 0 40px, var(--preto) 40px 80px);
+}
+.cadastro-cartao { width: 100%; max-width: 640px; }
+.cadastro-cartao h1 { margin: 0 0 4px; font-size: 28px; text-transform: uppercase; }
+.cadastro-cartao p.sub { margin: 0 0 20px; font-family: Arial, sans-serif; color: #444; }
+.secao { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 8px 0 12px;
+         padding: 4px 8px; background: var(--preto); color: var(--amarelo); display: inline-block; }
+.duas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.sucesso-acoes { margin-top: 12px; }
+@media (max-width: 560px) { .duas, .linha { grid-template-columns: 1fr; } }
+
+/* =========================================================
+   PARTE 4 - telas de CRUD (Veículos e Ordens de Serviço)
+   ========================================================= */
+.cartao h2 .modo { font-size: 13px; background: var(--amarelo); padding: 2px 8px; margin-left: 8px; vertical-align: middle; }
+.form-botoes { display: flex; gap: 10px; flex-wrap: wrap; }
+select {
+    width: 100%; padding: 10px 12px; font-size: 15px; font-family: Arial, sans-serif;
+    border: var(--borda); background: var(--branco); color: var(--preto); outline: none;
+}
+select:focus { background: #fffbe0; box-shadow: 4px 4px 0 var(--amarelo); }
+.form-editando { outline: 4px solid var(--amarelo); outline-offset: 4px; }
+
+.barra-lista { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.barra-lista input, .barra-lista select { flex: 1; min-width: 160px; width: auto; }
+.total { font-family: Arial, sans-serif; font-size: 13px; color: #555; margin: -6px 0 10px; }
+td.dinheiro { white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.placa { font-family: "Courier New", monospace; font-weight: bold; letter-spacing: 1px; white-space: nowrap; }
+td.texto-longo { max-width: 260px; }
+
+/* Status da ordem de serviço */
+.status { display: inline-block; padding: 3px 8px; font-size: 11px; font-weight: bold; text-transform: uppercase; border: 2px solid var(--preto); white-space: nowrap; }
+.status.ABERTA { background: var(--amarelo); }
+.status.EM_ANDAMENTO { background: #1e5bff; color: var(--branco); }
+.status.CONCLUIDA { background: var(--verde); color: var(--branco); }
+.status.CANCELADA { background: #9a9a9a; color: var(--branco); }
+
+/* Janela de confirmação */
+.modal-fundo { position: fixed; inset: 0; background: rgba(0, 0, 0, .7); display: grid; place-items: center; z-index: 100; padding: 16px; }
+.modal { background: var(--branco); border: var(--borda); box-shadow: 8px 8px 0 var(--amarelo); padding: 24px; max-width: 420px; width: 100%; }
+.modal h3 { margin: 0 0 8px; text-transform: uppercase; font-size: 22px; }
+.modal p { font-family: Arial, sans-serif; margin: 0 0 20px; }
+.modal-botoes { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.btn-claro { background: var(--branco); }
+.btn-perigo-cheio { background: var(--vermelho); color: var(--branco); }
+.btn-perigo-cheio:hover { background: var(--preto); color: var(--branco); }
+.toast-erro { background: var(--vermelho); }
+
+/* Painel do admin na tela de boas-vindas */
+.atalhos { display: flex; gap: 12px; flex-wrap: wrap; }
+/* Deixa a tabela rolar dentro do cartão em telas pequenas (em vez de alargar a página) */
+.grade > * { min-width: 0; }
+
+/* Tela de Veículos para o CLIENTE: só o formulário, centralizado */
+.grade.so-formulario { grid-template-columns: minmax(0, 520px); }
+.intro-cliente { font-family: Arial, sans-serif; font-size: 16px; max-width: 640px; margin: -8px 0 20px; }
